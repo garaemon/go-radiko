@@ -7,6 +7,40 @@
 
 The __unofficial__ [radiko.jp](https://radiko.jp/) APIs Client Library for Go
 
+## About this fork
+
+This repository is a fork of
+[yyoshiki41/go-radiko](https://github.com/yyoshiki41/go-radiko).
+It fixes timefree (timeshift) downloads, which broke when radiko changed its
+timefree API.
+radiko no longer serves `POST /v2/api/ts/playlist.m3u8`.
+
+Differences from upstream:
+
+- `TimeshiftPlaylistM3U8` builds the playlist URL from the new timefree
+  endpoint instead of calling the removed v2 API.
+- `GetTimeshiftPlaylistInfo` returns a `TimeshiftPlaylistInfo`.
+  `TimeshiftPlaylistInfo.ChunkURL` builds a playlist URL for one time range.
+  Callers download a program in chunks because the new endpoint limits the
+  number of segments per request.
+- `GetStreamPcHtml5URL` reads `/v3/station/stream/pc_html5/{station}.xml`.
+- `GetTimefreePlaylistBaseURL` picks the timefree playlist base URL from that
+  response, for either the area-free or the regular stream.
+- `GenerateLsid` generates the random session ID (`lsid`) that the timefree
+  endpoint requires.
+
+The module path stays `github.com/yyoshiki41/go-radiko`.
+To use this fork, add a `replace` directive to your `go.mod`:
+
+```
+replace github.com/yyoshiki41/go-radiko => github.com/garaemon/go-radiko <version>
+```
+
+[garaemon/radigo](https://github.com/garaemon/radigo), a fork of
+[yyoshiki41/radigo](https://github.com/yyoshiki41/radigo), uses this fork.
+garaemon/radigo records timefree programs in chunks with ffmpeg through
+`GetTimeshiftPlaylistInfo`.
+
 ## Installation
 
 
@@ -108,6 +142,7 @@ $ go run ./examples/auth/main.go
 ## Projects using go-radiko
 
 - [yyoshiki41/radigo](https://github.com/yyoshiki41/radigo) - Record a radiko program.
+- [garaemon/radigo](https://github.com/garaemon/radigo) - A fork of radigo that uses this fork for timefree recording.
 - [juntaki/toyotomimi](https://github.com/juntaki/toyotomimi)
 
 ## License 
